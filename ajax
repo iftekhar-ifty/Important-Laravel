@@ -1,0 +1,45 @@
+ $(document).ready(function () {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+   $('body').on('click', '#editProdut', function () {
+    var id = $(this).data("id");
+         $.get("/admin/productEdit/"+id, function (data) {
+        console.log(data)
+         $('#productId').val(data.id);
+         $('#productName').val(data.product_name);
+         $('#productCategory').val(data.category_id);
+         $('#productPrice').val(data.product_price);
+         $('#productNumber').val(data.product_number);
+      });
+      // alert(id);
+   });
+
+        $('#editForm').on('submit', function(e){
+        e.preventDefault();
+        var id = $('#productId').val();
+      
+            $.ajax({
+                    type:"PUT",
+                    url:"/admin/productUpdate/"+id,
+                    data: $('#editForm').serialize(),
+                    success: function (response) {
+                      // console.log(response);
+                        $('#editModal').modal('hide');
+                    toastr.success('Product Updated successfully !');
+                     $('#zero_config').load(location.href + ' #zero_config');
+                        // $("#editForm")[0].reset();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        toastr.error('error', 'Something want wrong try again');
+                    }
+            });
+   });
+
+
+
+
+});
