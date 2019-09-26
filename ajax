@@ -4,6 +4,9 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    /// Show data 
+
    $('body').on('click', '#editProdut', function () {
     var id = $(this).data("id");
          $.get("/admin/productEdit/"+id, function (data) {
@@ -16,6 +19,8 @@
       });
       // alert(id);
    });
+
+   ////update this data
 
         $('#editForm').on('submit', function(e){
         e.preventDefault();
