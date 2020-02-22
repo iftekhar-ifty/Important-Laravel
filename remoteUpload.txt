@@ -1,0 +1,11 @@
+////Remote Image upload
+ekhon dekhen
+      $url = $request->url;
+      $contents = file_get_contents($url);
+      $imageName = substr($url, strrpos($url, '/') + 1);
+      $imagePathName = Storage::put($imageName, $contents);
+
+$url = $request->windows;
+      $contents = file_get_contents($url);
+      $windowsName = substr($url, strrpos($url, '/') + 1);
+      // $imagePathName = Storage::put('public/windows/'.$windowsName, $contents); 
