@@ -1,0 +1,33 @@
+<select name="department_id" class="form-control" id="getDoctorList">
+//get id in foreach value 
+ $('#getDoctorList').change(function(){
+                var department_id = $(this).val();
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                  type:'POST',
+                  url:'/get-doctor-list',
+                  data:{department_id:department_id},
+                  success: function (data){
+                    $('#doctorList').html(data);
+                  }
+                });
+
+            });
+            
+            
+            ///controller
+            
+                public function getDoctorList()
+                      {
+                          $stringTosend = ' <option value="">Select Option</option>';
+                          $doctorlist = doctor::where('department_id', $_POST['department_id'])->get();
+                          foreach ($doctorlist as $doctor) {
+                              $stringTosend = $stringTosend.'<option value="'.$doctor->id.'">'.$doctor->doctorName.'</option>';
+                          }
+                          echo $stringTosend;
+                      }
