@@ -1,0 +1,133 @@
+ public $fileUploads; // if multiple then make it array
+
+ public $listeners = [
+        "add_file" => 'addFile', // for multiple
+			=> 'singleFileUploaded', // for single
+    ];
+
+
+ 
+  public function addFile($file){
+        try {
+            if($this->getFileInfo($file)["file_type"] == "image"){
+                array_push($this->fileUploads, $file);
+            }else{
+                session()->flash("error", "Uploaded file must be an image");
+            }
+        } catch (Exception $ex) {
+
+        }
+    }
+
+
+    public function singleFileUploaded($file){
+
+        try {
+            if($this->getFileInfo($file)["file_type"] == "image"){
+                $this->fileUploads = $file;
+            }else{
+                session()->flash("error", "Uploaded file must be an image");
+            }
+        } catch (Exception $ex) {
+
+        }
+    }
+
+    public function getFileInfo($file){
+
+        $info = [
+            "decoded_file" => NULL,
+            "file_meta" => NULL,
+            "file_mime_type" => NULL,
+            "file_type" => NULL,
+            "file_extension" => NULL,
+        ];
+        try{
+            $info['decoded_file'] = base64_decode(substr($file, strpos($file, ',') + 1));
+            $info['file_meta'] = explode(';', $file)[0];
+            $info['file_mime_type'] = explode(':', $info['file_meta'])[1];
+            $info['file_type'] = explode('/', $info['file_mime_type'])[0] ;
+            $info['file_extension'] = explode('/', $info['file_mime_type'])[1] ?? 'jpg';
+        }catch(Exception $ex){
+
+        }
+
+        return $info;
+    }
+
+ public function submit()
+    {
+
+
+	// for single
+
+       $file_data = $this->getFileInfo($this->fileUploads);
+       $file_name = Str::random(10).'.'.$file_data['file_extension'];
+       $result = Storage::disk('public')->put($file_name, $file_data['decoded_file']);
+
+      //Multiple Files Upload
+
+        foreach($this->fileUploads as $k => $v){
+                $file_data = $this->getFileInfo($v);
+                $file_name = Str::random(10).'.'.$file_data['file_extension'];
+                $result = Storage::disk('public')->put($file_name, $file_data['decoded_file']);
+         }
+
+
+
+        dd('done');
+    }
+
+
+////////////
+
+						  <input type="file"
+                                       wire:change="$emit('single_file_choosed')"
+                                       wire:change="$emit('multiple_file_choosed')"
+                                       class="form-control" id="fileUploads"
+                                       name="files"
+                                       accept="image/*"
+                                       placeholder="Enter Location Zip" multiple >
+
+
+ <script>
+        // signle
+           window.livewire.on('single_file_choosed', function(){
+            try {
+                let file = event.target.files[0];
+                if(file){
+                    let reader = new FileReader();
+                    reader.onloadend = () => {
+                        window.livewire.emit('single_file_uploaded', reader.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        });
+
+           // multiple
+         window.livewire.on('multiple_file_choosed', function(){
+            try {
+                let files = event.target.files;
+                let read_files = [];
+                if(files.length>0){
+                    for(let index in files){
+                        if(typeof files[index] == "object"){
+                            let reader = new FileReader();
+                            reader.onloadend = () => {
+                                window.livewire.emit('add_file', reader.result);
+                            }
+                            reader.readAsDataURL(files[index]);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('eorroe-',error);
+            }
+
+        });
+    </script>
+
+
